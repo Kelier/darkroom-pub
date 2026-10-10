@@ -8,7 +8,7 @@
 
 [30 秒演示](#30-seconds-in-the-lab) · [快速启动](#boot) · [功能手册](docs/FEATURES.md) · [能力边界](#known-limits)
 
-https://github.com/kelier/darkroom-pub/raw/main/media/darkroom-demo.mp4
+[![DARKROOM — 点击播放 30 秒演示](media/demo-cover.jpg)](https://github.com/Kelier/darkroom-pub/raw/main/media/darkroom-demo.mp4)
 
 </div>
 
@@ -29,15 +29,13 @@ DARKROOM 把照片编辑器做成一间可操作的暗房：装入胶卷，看�
 
 ## 30 seconds in the lab
 
-<video src="https://github.com/kelier/darkroom-pub/raw/main/media/darkroom-demo.mp4" controls muted playsinline width="860" poster="https://github.com/kelier/darkroom-pub/raw/main/media/demo-cover.jpg">
-  你的浏览器不支持内嵌视频。<a href="https://github.com/kelier/darkroom-pub/raw/main/media/darkroom-demo.mp4">▶ 点击播放功能演示 · 30 秒 / 1080p</a>
-</video>
+[![▶ 播放功能演示 · 30 秒 / 1080p](media/demo-cover.jpg)](https://github.com/Kelier/darkroom-pub/raw/main/media/darkroom-demo.mp4)
 
-**[▶ 直接下载 / 打开 MP4 · 30 秒 / 1080p](https://github.com/kelier/darkroom-pub/raw/main/media/darkroom-demo.mp4)**
+<!-- VIDEO_EMBED -->
 
 以同一张照片展示五个特色：**主体识别与智能构图 → 人物遮挡文字与明朝绕排 → AI 深度与 2.5D 视差 → 保留胶片的跨结构版式 → 胶卷显影**。浅色版式展示与深色空间动效交替，直接对比功能的实际效果。照片、分割结果、深度图和 72 帧视差序列均来自 DARKROOM 的真实渲染；标题、检测框和镜头编排为视频合成。中文文案配原创电子音乐。
 
-> 顶部视频在 GitHub 页面内直接播放；若所在平台不支持内嵌（如部分镜像站），可点上方链接下载后观看。
+> 点击上方封面即可播放 30 秒演示（新标签页打开 MP4）。GitHub 仅对以 user-attachments 方式上传的视频支持页面内内嵌播放，仓库内的 MP4 文件链接只能跳转或下载。
 
 <a id="boot"></a>
 ## Boot
