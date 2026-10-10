@@ -1,4 +1,4 @@
-import {isVideo,stem,videoSource,seek,embeddedMotion,exportLive} from './live.js';
+import {collectLive,liveRecord,exportLive} from './live.js';
 // Contact strip (session tray), batch import / sync / export, collage creation, single & video export.
 
 import { RATIOS, TEMPLATES, FILMS } from './presets.js';
@@ -61,26 +61,21 @@ bus.renderStrip = renderStrip;
 
 // ---------------- import ----------------
 export async function importFiles(files) {
-  const all=[...files], videos=all.filter(isVideo), used=new Set(), list=[];
-  for(const f of all.filter(f=>f.type.startsWith('image/')||/\.(heic|heif|jpg|png|webp)$/i.test(f.name))){const pair=videos.find(v=>stem(v)===stem(f));if(pair)used.add(pair);list.push({f,video:pair});}
-  videos.filter(v=>!used.has(v)).forEach(v=>list.push({f:null,video:v}));
-  if(!list.length)return toast('请选择图片、动态 JPG 或 MOV / MP4 视频','err');
-  const t=task('import',`导入 ${list.length} 个作品`),ids=[],failures=[];
+  const list=await collectLive([...files]);
+  if(!list.length)return toast('请选择图片、实况 / 动态照片或 MOV / MP4 视频','err');
+  const t=task('import',`导入 ${list.length} 个作品`),ids=[],failures=[];let lives=0;
   for(let i=0;i<list.length;i++){
-    const {f,video}=list[i];let source;
+    const item=list[i],src=item.f||item.video;
     try{
-      const motion=video||(f&&await embeddedMotion(f));let cover=f,live=null;
-      if(motion){source=await videoSource(motion);await seek(source,0);if(!cover)cover=await new Promise(r=>source.canvas.toBlob(r,'image/jpeg',.95));live={blob:motion,name:video?.name||'motion.mp4',duration:source.v.duration};}
-      const img=await blobToImage(cover);
-      const rec={id:uid('P'),name:(f||video).name.replace(/\.\w+$/,''),created:Date.now(),updated:Date.now()+i,blob:cover,live,doc:null,hist:[],thumb:rawThumb(img),assets:{}};
+      const {cover,img,live}=await liveRecord(item);if(live)lives++;
+      const rec={id:uid('P'),name:(src.name||'motion').replace(/\.\w+$/,''),created:Date.now(),updated:Date.now()+i,blob:cover,live,doc:null,hist:[],thumb:rawThumb(img),assets:{}};
       await saveProject(rec);addToTray(rec.id);ids.push(rec.id);
-    }catch(e){failures.push((f||video).name+': '+(e.message||'图片无法解码，可转为 JPG 后重试'));}finally{source?.dispose();}
+    }catch(e){failures.push((src.name||'文件')+': '+(e.message||'图片无法解码，可转为 JPG 后重试'));}
     t.progress((i+1)/list.length,`${i+1}/${list.length}`);
   }
-  t.done(`已导入 ${ids.length} 个作品`);
+  t.done(lives?`已导入 ${ids.length} 个作品 · ${lives} 个实况`:`已导入 ${ids.length} 个作品`);
   if(ids.length){await bus.openById(ids[0]);if(ids.length>1){ids.slice(1).forEach(id=>S.traySel.add(id));renderStrip();}}
   if(failures.length)modal(`<h3>部分文件未能导入</h3><p class="sub">已导入 ${ids.length} 个作品。以下文件可转换格式后重试：</p><p>${failures.map(esc).join('<br>')}</p><div class="modal-actions"><button class="btn" data-close>知道了</button></div>`);
-
 }
 
 // ---------------- apply engine (sync / batch style) ----------------
@@ -196,12 +191,13 @@ function exportWidth(doc, M) {
   return a >= 1 ? long : Math.round(long * a);
 }
 
-export function openExportModal() {
+export function openExportModal({ still = false } = {}) {
   if (!S.doc) return;
+  if (S.project?.live?.blob && !still) return exportLive();
   const m = modal(`<h3>导出</h3><p class="sub">按原图分辨率重新渲染全部参数与图层。导出文件不包含 EXIF / GPS 位置信息。</p>
     <div class="exp-preview"><canvas id="expPreview"></canvas></div>${exportFields()}
     <p class="muted small mono" id="expInfo"></p>
-    <div class="modal-actions">${S.project?.live ? '<button class="btn" id="liveExp">Live 动态</button>' : ''}${S.doc.cam?.on ? '<button class="btn" id="vid">2.5D 视频</button>' : ''}<button class="btn ghost" data-close>取消</button><button class="btn primary" id="go">下载</button></div>`);
+    <div class="modal-actions">${S.project?.live ? '<button class="btn" id="liveExp">导出实况</button>' : ''}${S.doc.cam?.on ? '<button class="btn" id="vid">2.5D 视频</button>' : ''}<button class="btn ghost" data-close>取消</button><button class="btn primary" id="go">下载</button></div>`);
   if ($('#liveExp',m.c)) $('#liveExp',m.c).onclick=()=>{m.close();exportLive();};
   render($('#expPreview', m.c), S.doc, S.M, 520, { fast: true });
   const info = () => { const w = exportWidth(S.doc, S.M), h = Math.round(w / canvasAspect(S.doc, baseOf(S.doc, S.M))); $('#expInfo', m.c).textContent = `${w} × ${h} px`; };

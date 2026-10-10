@@ -42,12 +42,13 @@ export function task(id, label) {
     box.append(row); S.tasks.set(id, row);
     requestAnimationFrame(() => row.classList.add('in'));
   }
-  $('b', row).textContent = label;
+  clearTimeout(row._t); row.classList.remove('ok', 'err'); $('b', row).textContent = label;
+  const end = (ms) => { clearTimeout(row._t); row._t = setTimeout(() => { row.classList.remove('in'); setTimeout(() => row.remove(), 300); if (S.tasks.get(id) === row) S.tasks.delete(id); }, ms); };
   const api = {
     progress(p, note = '') { $('.bar i', row).style.width = Math.round(Math.max(0, Math.min(1, p)) * 100) + '%'; $('small', row).textContent = note; return api; },
     label(l) { $('b', row).textContent = l; return api; },
-    done(msg) { row.classList.add('ok'); if (msg) $('b', row).textContent = msg; $('.bar i', row).style.width = '100%'; setTimeout(() => { row.classList.remove('in'); setTimeout(() => row.remove(), 300); S.tasks.delete(id); }, 900); },
-    fail(msg) { row.classList.add('err'); $('b', row).textContent = msg; setTimeout(() => { row.classList.remove('in'); setTimeout(() => row.remove(), 300); S.tasks.delete(id); }, 3200); },
+    done(msg) { row.classList.add('ok'); if (msg) $('b', row).textContent = msg; $('.bar i', row).style.width = '100%'; end(900); },
+    fail(msg) { row.classList.add('err'); $('b', row).textContent = msg; end(3200); },
   };
   return api;
 }

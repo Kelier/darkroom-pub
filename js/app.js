@@ -18,7 +18,7 @@ import { mountLive, openLiveImport, stopLive } from './live.js';
 // ---------------- navigation ----------------
 function go(view) {
   stopLive();
-  S.view = view;
+  S.view = view; document.body.dataset.view = view;
   $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
   $$('[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === view));
   moveIndicator();
@@ -36,6 +36,7 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('[data-action=upload]')) $('#fileInput').click();
 });
 addEventListener('resize', () => { moveIndicator(); scheduleRender(); });
+new ResizeObserver(() => scheduleRender()).observe($('#stageInner'));
 
 // ---------------- history ----------------
 function commit(label, opts = {}) {
@@ -307,7 +308,7 @@ function paintBrush(canvas, from, to, erase) {
 }
 ov.addEventListener('pointerdown', (e) => {
   if (!S.info || S.anim) return;
-  ov.setPointerCapture(e.pointerId);
+  try { ov.setPointerCapture(e.pointerId); } catch {}
   const p = evPt(e), isPhoto = S.doc.kind !== 'collage';
   S.dragging = true;
   if (isPhoto && S.tool === 'local') {
@@ -367,6 +368,7 @@ ov.addEventListener('pointermove', (e) => {
   S.lastInput = performance.now();
   scheduleRender();
 });
+bus.cancelDrag = () => { drag = null; S.dragging = false; ov.style.cursor = ''; };
 const endDrag = () => {
   S.dragging = false;
   if (!drag) return;
@@ -399,6 +401,7 @@ function setFocus(p) { const s = toSource(p); S.doc.optics.focusX = s.x; S.doc.o
 // compare / inspector toggle
 const cmp = $('#compareBtn');
 const setCompare = (v) => { if (S.compare === v) return; S.compare = v; cmp.classList.toggle('on', v); updateHud(); scheduleRender(); };
+bus.setCompare = setCompare;
 cmp.addEventListener('pointerdown', () => setCompare(true));
 ['pointerup', 'pointerleave'].forEach(ev => cmp.addEventListener(ev, () => setCompare(false)));
 $('#inspBtn').onclick = () => {

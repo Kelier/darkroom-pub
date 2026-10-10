@@ -165,7 +165,7 @@ export async function renderLibrary() {
   g.innerHTML = '';
   list.forEach((p, i) => {
     const tname = p.doc?.kind === 'collage' ? '拼贴' : TEMPLATES.find(t => t.id === p.template)?.name;
-    const w = el(`<div class="work ${libSel.has(p.id) ? 'sel' : ''}" style="animation-delay:${Math.min(i, 12) * 25}ms"><div class="wthumb"><img src="${p.thumb || ''}" alt=""><span class="ck" title="选择"></span></div>
+    const w = el(`<div class="work ${libSel.has(p.id) ? 'sel' : ''}" style="animation-delay:${Math.min(i, 12) * 25}ms"><div class="wthumb"><img src="${p.thumb || ''}" alt="">${p.live ? '<span class="wlive"><i></i>LIVE</span>' : ''}<span class="ck" title="选择"></span></div>
       <div class="wmeta"><div><b>${esc(p.name)}</b><small>${fmtDate(p.updated)} · ${p.doc ? `${(p.hist || []).length} 版${tname ? ' · ' + tname : ''}` : '未冲洗'}</small></div>
       <button class="icon-btn" data-dup title="复制项目"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg></button></div></div>`);
     $('.ck', w).onclick = (e) => { e.stopPropagation(); libSel.has(p.id) ? libSel.delete(p.id) : libSel.add(p.id); renderLibrary(); };
