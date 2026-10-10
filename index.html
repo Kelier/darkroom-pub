@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0c">
+<title>DARKROOM · AI 照片暗房</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b0b0c'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23ff4836'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Caveat:wght@500;600;700&family=Ma+Shan+Zheng&family=Special+Elite&family=Shippori+Mincho:wght@500;700&family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Anton&family=Abril+Fatface&family=ZCOOL+XiaoWei&family=Share+Tech+Mono&family=Zen+Old+Mincho:wght@400;600;700;900&family=Shippori+Mincho+B1:wght@500;800&family=Kaisei+Tokumin:wght@400;700;800&family=Hina+Mincho&family=LXGW+WenKai+TC:wght@400;700&family=Zhi+Mang+Xing&display=swap">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="app" id="app">
+  <header class="topbar">
+    <a class="brand" href="#" data-view="discover"><span class="safelight"></span><b>DARKROOM</b><em>AI photo lab</em></a>
+    <nav class="modules" id="modules">
+      <button data-view="discover" class="active">灵感</button>
+      <button data-view="editor">冲洗</button>
+      <button data-view="library">片夹</button>
+      <button data-view="me">我的</button>
+      <span class="mod-ind" id="modInd"></span>
+    </nav>
+    <div class="top-r">
+      <span class="chip-ml" id="mlChip" title="所有 AI 能力在本机浏览器内运行"><i></i>端侧 AI</span>
+      <button class="btn primary sm" data-action="upload"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>导入照片</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- 灵感 -->
+    <section class="view active" id="view-discover">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="safelight sm"></span>DARKROOM · AI 照片暗房</p>
+          <h1>一张照片，<br>多种构图，<em>多种表达。</em></h1>
+          <p class="lede">构图、调色、光学、空间、文字与版式——在一个暗房里完成。深度估计、主体分割、生成式扩图全部在你的浏览器里运行，照片不离开本机。</p>
+          <div class="hero-actions">
+            <button class="btn primary lg" data-action="upload"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>导入照片，开始冲洗</button>
+            <span class="muted">支持拖拽、多选批量导入</span>
+          </div>
+          <div class="samples" id="samples"></div>
+        </div>
+        <div class="hero-stack" id="heroStack"></div>
+      </header>
+      <section class="block">
+        <div class="block-head"><span class="idx">01</span><h2>版式模板</h2><p>同一张底片实时生成。模板感知主体位置，标题自动避让人物。</p></div>
+        <div class="tpl-grid" id="tplGrid"></div>
+      </section>
+      <section class="block">
+        <div class="block-head"><span class="idx">02</span><h2>胶片风格</h2><p>预设 + 独立参数，强度可控，可保存为个人风格并批量套用。</p></div>
+        <div class="film-row" id="filmRow"></div>
+      </section>
+      <section class="block">
+        <div class="block-head"><span class="idx">03</span><h2>暗房能力</h2><p>四个端侧模型驱动，无需上传。</p></div>
+        <div class="caps" id="caps"></div>
+      </section>
+      <footer class="foot">DARKROOM · 所有处理在本机完成 · 胶片风格为自有命名，不代表任何品牌官方模拟</footer>
+    </section>
+
+    <!-- 冲洗 -->
+    <section class="view" id="view-editor">
+      <div class="empty-editor" id="emptyEditor">
+        <div class="drop-card" data-action="upload">
+          <div class="drop-ring"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+          <h3>把底片放进暗房</h3>
+          <p>拖拽照片到这里，或点击选择。可一次导入多张，进入片夹批量处理。</p>
+          <div class="kbd-row"><kbd>1</kbd>–<kbd>9</kbd> 切换工具 <kbd>Space</kbd> 对比原图 <kbd>⌘Z</kbd> 撤销 <kbd>R</kbd> Roll</div>
+        </div>
+      </div>
+      <div class="editor" id="editor" hidden>
+        <div class="ed-bar">
+          <input class="proj-name" id="projName" value="未命名" spellcheck="false">
+          <div class="ed-bar-mid">
+            <button class="icon-btn" id="undoBtn" title="撤销 ⌘Z"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+            <button class="icon-btn" id="redoBtn" title="重做 ⇧⌘Z"><svg viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg></button>
+            <button class="icon-btn" id="histBtn" title="版本历史"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></button>
+            <span class="sep"></span>
+            <button class="seg-btn" id="compareBtn" title="按住对比原图（或按住空格）"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M12 5v14"/></svg><span>对比</span></button>
+            <button class="seg-btn" id="resetOriginal" title="还原所有编辑，可撤销">还原底片</button><button class="seg-btn" id="darkenBtn" aria-pressed="false" title="隐藏工具，专注照片">熄灯</button><button class="seg-btn" id="liveBtn" title="导入和编辑动态照片">LIVE</button>
+            <button class="seg-btn" id="inspBtn" title="显示/隐藏右侧信息栏"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M15 4v16"/></svg><span>信息</span></button>
+          </div>
+          <div class="ed-bar-r">
+            <span class="save-state" id="saveState"></span>
+            <button class="btn ghost sm" id="saveBtn">保存</button>
+            <button class="btn primary sm" id="exportBtn">导出</button>
+          </div>
+        </div>
+        <div class="ed-main" id="edMain">
+          <nav class="rail" id="tools"></nav>
+          <aside class="panel" id="panel"></aside>
+          <div class="stage" id="stage">
+            <div class="stage-inner" id="stageInner">
+              <canvas id="ghost"></canvas>
+              <canvas id="view"></canvas>
+              <canvas id="overlay"></canvas>
+              <div class="hud" id="hud"></div>
+              <div class="busy" id="busy" hidden><div class="busy-c"><span class="spin lg"></span><b>显影中…</b><small>分析主体、场景与构图</small></div></div>
+            </div>
+            <div id="liveTimeline" hidden></div><div class="roll-dock" id="rollDock" aria-label="胶卷架"></div>
+            <div class="stage-foot">
+              <div class="ratio-chips" id="ratioChips"></div>
+              <div class="roll-dock"><div class="locks" id="locks"></div><button class="btn roll" id="rollAll" title="Roll 全部未锁定的维度 (R)"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Roll</button></div>
+            </div>
+          </div>
+          <aside class="inspector" id="insights"></aside>
+        </div>
+        <div class="strip" id="strip"></div>
+      </div>
+    </section>
+
+    <!-- 片夹 -->
+    <section class="view" id="view-library">
+      <div class="lib-head">
+        <div class="block-head"><span class="idx">LIB</span><h2>片夹</h2><p>每个项目保存原图、生成素材与全部参数，可回到任一版本。</p></div>
+        <div class="lib-actions" id="libActions"></div>
+      </div>
+      <div class="works-grid" id="worksGrid"></div>
+    </section>
+
+    <!-- 我的 -->
+    <section class="view" id="view-me">
+      <div class="lib-head"><div class="block-head"><span class="idx">ME</span><h2>我的</h2><p>个人风格、收藏、模型与偏好。</p></div></div>
+      <div class="me-grid" id="meGrid"></div>
+    </section>
+  </main>
+
+  <nav class="tabbar" id="tabbar">
+    <button data-view="discover" class="active"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z"/></svg><span>灵感</span></button>
+    <button data-view="editor"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg><span>冲洗</span></button>
+    <button data-view="library"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>片夹</span></button>
+    <button data-view="me"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>我的</span></button>
+  </nav>
+</div>
+
+<div class="modal" id="modal" hidden><div class="modal-card" id="modalCard"></div></div>
+<div class="pop" id="histPop" hidden></div>
+<div class="tasks" id="tasks"></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept="image/*,video/mp4,video/quicktime,video/webm,.mov,.heic,.heif" multiple hidden>
+<div class="dropveil" id="dropveil"><div><span class="safelight"></span>松开以导入到片夹</div></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
