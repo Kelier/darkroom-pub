@@ -18,7 +18,7 @@ import { mountLive, openLiveImport, stopLive } from './live.js';
 // ---------------- navigation ----------------
 function go(view) {
   stopLive();
-  S.view = view; document.body.dataset.view = view;
+  S.view = view; document.body.dataset.page = view;
   $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
   $$('[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === view));
   moveIndicator();

@@ -124,4 +124,4 @@ async function act(a) {
 addEventListener('keydown', (e) => { if (e.key === 'Escape') closeInsp(); });
 // Leaving lights-out on a phone: tap anywhere on the dark stage.
 $('#stage').addEventListener('click', (e) => { if (isMobileUI() && editor.classList.contains('lights-out') && !e.target.closest('button,input')) $('#darkenBtn').click(); });
-if (S.view) document.body.dataset.view = S.view;
+if (S.view) document.body.dataset.page = S.view;

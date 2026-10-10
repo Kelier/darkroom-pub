@@ -621,9 +621,9 @@ select { border: 1px solid var(--line2); border-radius: 8px; padding: 6px 8px; w
 @media (max-width: 760px) {
   .app { grid-template-rows: 48px minmax(0, 1fr) calc(56px + env(safe-area-inset-bottom)); }
   .tabbar { padding-bottom: env(safe-area-inset-bottom); }
-  body[data-view=editor]:has(#editor:not([hidden])) .app { grid-template-rows: minmax(0, 1fr); }
-  body[data-view=editor]:has(#editor:not([hidden])) .topbar,
-  body[data-view=editor]:has(#editor:not([hidden])) .tabbar { display: none; }
+  body[data-page=editor]:has(#editor:not([hidden])) .app { grid-template-rows: minmax(0, 1fr); }
+  body[data-page=editor]:has(#editor:not([hidden])) .topbar,
+  body[data-page=editor]:has(#editor:not([hidden])) .tabbar { display: none; }
   .m-only { display: inline-grid !important; }
 
   .editor { grid-template-rows: auto minmax(0, 1fr) auto; --sheet-h: 36dvh; }

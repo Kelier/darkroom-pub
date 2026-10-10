@@ -6,9 +6,9 @@
 
 `LOCAL-FIRST` · `NON-DESTRUCTIVE` · `CANVAS + WEBGL2` · `WASM INFERENCE`
 
-[30 秒演示](#30-seconds-in-the-lab) · [快速启动](#boot) · [功能手册](docs/FEATURES.md) · [能力边界](#known-limits)
+[30 秒演示](media/darkroom-demo.mp4) · [快速启动](#boot) · [功能手册](docs/FEATURES.md) · [能力边界](#known-limits)
 
-[![DARKROOM — 点击播放 30 秒演示](media/demo-cover.jpg)](https://github.com/Kelier/darkroom-pub/raw/main/media/darkroom-demo.mp4)
+[![DARKROOM — watch the 30-second demo](media/demo-cover.jpg)](media/darkroom-demo.mp4)
 
 </div>
 
@@ -29,13 +29,11 @@ DARKROOM 把照片编辑器做成一间可操作的暗房：装入胶卷，看�
 
 ## 30 seconds in the lab
 
-[![▶ 播放功能演示 · 30 秒 / 1080p](media/demo-cover.jpg)](https://github.com/Kelier/darkroom-pub/raw/main/media/darkroom-demo.mp4)
-
-<!-- VIDEO_EMBED -->
+**[▶ 播放功能演示 · 30 秒 / 1080p](media/darkroom-demo.mp4)**
 
 以同一张照片展示五个特色：**主体识别与智能构图 → 人物遮挡文字与明朝绕排 → AI 深度与 2.5D 视差 → 保留胶片的跨结构版式 → 胶卷显影**。浅色版式展示与深色空间动效交替，直接对比功能的实际效果。照片、分割结果、深度图和 72 帧视差序列均来自 DARKROOM 的真实渲染；标题、检测框和镜头编排为视频合成。中文文案配原创电子音乐。
 
-> 点击上方封面即可播放 30 秒演示（新标签页打开 MP4）。GitHub 仅对以 user-attachments 方式上传的视频支持页面内内嵌播放，仓库内的 MP4 文件链接只能跳转或下载。
+> GitHub 仓库内的 MP4 链接不一定直接内嵌播放；点击封面打开文件，或下载后播放。
 
 <a id="boot"></a>
 ## Boot
