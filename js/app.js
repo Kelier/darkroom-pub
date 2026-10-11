@@ -11,12 +11,20 @@ import { loadDetector } from './ml/index.js';
 import { S, bus, $, $$, el, esc, clone, toast, fmtTime } from './state.js';
 import { buildPanel, TOOLS, panelOnRender } from './panels.js';
 import { renderStrip, addToTray, importFiles, openExportModal } from './batch.js';
-import { initDiscover, renderLibrary, renderMe, SAMPLES, discoverShown } from './pages.js';
+import { initDiscover, renderLibrary, renderMe, SAMPLES, discoverShown, STOCK_COLORS } from './pages.js';
+import { STICKERS } from './stickers.js';
 import { placeGizmo } from './gizmo.js';
 import { mountLive, openLiveImport, stopLive } from './live.js';
 
 // ---------------- navigation ----------------
 function go(view) {
+  if (view !== S.view && document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches && !go.busy) {
+    go.busy = true; document.documentElement.dataset.vt = view === 'editor' ? 'develop' : 'slide';
+    const t = document.startViewTransition(() => goNow(view)); t.finished.finally(() => { go.busy = false; }); return;
+  }
+  goNow(view);
+}
+function goNow(view) {
   stopLive();
   S.view = view; document.body.dataset.page = view;
   $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
@@ -61,14 +69,15 @@ $('#undoBtn').onclick = () => restore(S.hi - 1);
 $('#redoBtn').onclick = () => restore(S.hi + 1);
 $('#histBtn').onclick = (e) => {
   const p = $('#histPop');
-  if (!p.hidden) { p.hidden = true; return; }
+  if (!p.hidden && p.dataset.kind !== 'more') { p.hidden = true; return; }
+  p.dataset.kind = 'hist';
   const r = e.currentTarget.getBoundingClientRect();
   p.style.left = Math.max(8, Math.min(innerWidth - 300, r.left - 130)) + 'px'; p.style.top = (r.bottom + 6) + 'px';
   p.innerHTML = `<h5>版本历史 · ${S.hist.length}</h5>` + S.hist.map((h, i) => `<button class="hist-item ${i === S.hi ? 'cur' : ''}" data-i="${i}"><span>${String(i + 1).padStart(2, '0')} · ${esc(h.label)}</span><small>${fmtTime(h.t)}</small></button>`).reverse().join('');
   p.hidden = false;
   $$('.hist-item', p).forEach(b => b.onclick = () => { restore(+b.dataset.i); p.hidden = true; });
 };
-document.addEventListener('pointerdown', (e) => { const p = $('#histPop'); if (!p.hidden && !p.contains(e.target) && !e.target.closest('#histBtn')) p.hidden = true; });
+document.addEventListener('pointerdown', (e) => { const p = $('#histPop'); if (!p.hidden && !p.contains(e.target) && !e.target.closest('#histBtn,#moreBtn')) p.hidden = true; });
 
 // ---------------- persistence ----------------
 let saveT = null;
@@ -123,6 +132,7 @@ async function openRecord(rec, opts = {}) {
   renderRolls();
   addToTray(rec.id);
   $('#busy').hidden = true;
+  const st = $('#stage'); st.classList.remove('reveal'); void st.offsetWidth; st.classList.add('reveal');
   bus.recomputeCrops();
   setTool(opts.tool || (doc.kind === 'collage' ? 'layout' : opts.template ? 'layout' : 'auto'));
   renderInsights(); updateHistButtons(); buildRatioChips(); buildLocks(); updateHud();
@@ -482,8 +492,11 @@ function buildRatioChips() {
 }
 const LOCK_SVG = (on) => on ? '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>' : '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/></svg>';
 const LOCKS = [['crop', '构图'], ['frame', '画布'], ['caption', '文案'], ['font', '字体'], ['film', '调色']];
+$('#lockTog').onclick = (e) => { e.stopPropagation(); $('#locksPop').hidden = !$('#locksPop').hidden; };
+document.addEventListener('pointerdown', (e) => { if (!e.target.closest('.dock-roll')) $('#locksPop').hidden = true; });
 function buildLocks() {
-  const box = $('#locks');
+  const box = $('#locks'), n = Object.values(S.locks).filter(Boolean).length;
+  $('#lockN').textContent = n || ''; $('#lockTog').classList.toggle('on', n > 0);
   box.innerHTML = LOCKS.map(([k, n]) => `<button class="lock ${S.locks[k] ? 'on' : ''}" data-l="${k}" title="锁定后 Roll 不会改变${n}">${LOCK_SVG(S.locks[k])}${n}</button>`).join('');
   $$('[data-l]', box).forEach(b => b.onclick = () => { S.locks[b.dataset.l] = !S.locks[b.dataset.l]; buildLocks(); });
 }
@@ -600,9 +613,17 @@ $('#exportBtn').onclick = () => openExportModal();
 // Physical film shelf. Presets replace the whole color recipe, never accumulate.
 function renderRolls() {
   const dock=$('#rollDock'); if(!S.doc) return;
-  const colors=['#ddd2b8','#d4a638','#9bac8a','#c8aa91','#d78053','#829ea4','#c1beb3','#90a8b1','#b7825c','#a58aa3'];
-  dock.innerHTML=FILMS.map((f,i)=>`<button class="film-roll ${S.doc.film.preset===f.id?'loaded':''}" data-stock="${f.id}" aria-pressed="${S.doc.film.preset===f.id}" style="--stock:${colors[i%colors.length]}" title="装载 ${f.name}"><span class="spool"></span><span class="canister"><small>${f.sub}</small><b>${f.name}</b><em>${f.id==='none'?'ORIGINAL':'35 mm / 36 EXP'}</em></span></button>`).join('');
-  $$('[data-stock]',dock).forEach(b=>b.onclick=()=>bus.loadFilm(b.dataset.stock));
+  if(dock.dataset.pid!==S.project.id){
+    dock.dataset.pid=S.project.id;
+    dock.innerHTML=FILMS.map((f,i)=>`<button class="stock" data-stock="${f.id}" style="--stock:${STOCK_COLORS[i%STOCK_COLORS.length]}" title="装载 ${f.name} · ${f.sub}"><span class="stock-img"></span><span class="stock-meta"><b>${f.name}</b><em>${f.sub}</em></span></button>`).join('');
+    $$('[data-stock]',dock).forEach(b=>b.onclick=()=>bus.loadFilm(b.dataset.stock));
+  }
+  $$('[data-stock]',dock).forEach(b=>{const on=S.doc.film.preset===b.dataset.stock;b.classList.toggle('loaded',on);b.setAttribute('aria-pressed',on);});
+  // thumbnails follow the framing, debounced so dragging stays smooth
+  clearTimeout(renderRolls.t); renderRolls.t=setTimeout(()=>{
+    const key=JSON.stringify([S.project.id,S.doc.crop,S.doc.ratio,S.doc.base||'',S.doc.geo]); if(dock.dataset.key===key) return; dock.dataset.key=key;
+    $$('[data-stock]',dock).forEach(b=>{const id=b.dataset.stock,box=$('.stock-img',b);box.replaceChildren(thumbSlot(()=>({...S.doc,layers:[],template:null,frame:{...S.doc.frame,mode:'none'},film:{...newDoc(S.project.id).film,preset:id,date:false}}),112));});
+  },450);
 }
 bus.loadFilm=(id)=>{
   if(!S.doc)return;stopLive();
@@ -620,7 +641,7 @@ bus.resetOriginal=async()=>{
 $('#resetOriginal').onclick=()=>bus.resetOriginal();
 $('#liveBtn').onclick=()=>openLiveImport();
 $('#darkenBtn').onclick=()=>{
- const on=$('#editor').classList.toggle('lights-out');$('#darkenBtn').textContent=on?'开灯':'熄灯';$('#darkenBtn').setAttribute('aria-pressed',on);S.showGrid=!on;bus.drawOverlay();requestAnimationFrame(()=>scheduleRender(true));
+ const on=$('#editor').classList.toggle('lights-out');$('#darkenBtn').classList.toggle('on',on);$('#darkenBtn').title=on?'开灯（Esc）':'熄灯：隐藏工具，只看作品';$('#darkenBtn').setAttribute('aria-pressed',on);S.showGrid=!on;bus.drawOverlay();requestAnimationFrame(()=>scheduleRender(true));
 };
 addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#editor').classList.contains('lights-out'))$('#darkenBtn').click();});
 
@@ -634,6 +655,10 @@ let fontT = null;
 document.fonts.addEventListener?.('loadingdone', () => { clearTimeout(fontT); fontT = setTimeout(() => { clearRenderCache(); if (S.M) { scheduleRender(); refreshThumbs(); } bus.redrawDiscover?.(); }, 600); });
 
 renderRail(); buildLocks(); moveIndicator();
+$('#easelStk').innerHTML = STICKERS.canister;
+$('#negStrip').innerHTML = SAMPLES.map((s, i) => `<button data-s="${i}" title="${s.name}"><img src="${s.src}" alt="${s.name}"><i>${String(i + 1).padStart(2, '0')}A</i></button>`).join('');
+$$('#negStrip button').forEach(b => b.onclick = () => openSample(SAMPLES[+b.dataset.s]));
+$('.easel').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#fileInput').click(); } });
 // fonts first so the first discover paint is final; heavy model init waits until the intro has settled
 Promise.race([loadFonts(), new Promise(r => setTimeout(r, 1800))]).then(initDiscover);
 setTimeout(() => (window.requestIdleCallback || setTimeout)(() => loadDetector()), 3000);

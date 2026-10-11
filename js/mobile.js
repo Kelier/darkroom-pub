@@ -108,7 +108,16 @@ $('#moreBtn').onclick = async () => {
     ['lights', lights ? '开灯' : '熄灯模式', '隐藏工具，只看作品'],
     ['reset', '还原底片', '回到拍摄原片，可撤销', 'danger'],
   ];
-  const m = modal(`<div class="act-sheet">${items.map(([k, t, s, c]) => `<button class="act ${c || ''}" data-a="${k}"><b>${t}</b>${s ? `<small>${s}</small>` : ''}</button>`).join('')}</div><div class="modal-actions stack"><button class="btn ghost" data-close>取消</button></div>`);
+  const list = (isMobileUI() ? items : items.filter(([k]) => !['lights', 'info'].includes(k))).map(([k, t, s, c]) => `<button class="act ${c || ''}" data-a="${k}"><b>${t}</b>${s ? `<small>${s}</small>` : ''}</button>`).join('');
+  if (!isMobileUI()) {
+    const p = $('#histPop'), r = $('#moreBtn').getBoundingClientRect();
+    if (!p.hidden && p.dataset.kind === 'more') { p.hidden = true; return; }
+    p.dataset.kind = 'more'; p.innerHTML = `<div class="act-sheet">${list}</div>`; p.hidden = false;
+    p.style.left = Math.max(8, r.right - 290) + 'px'; p.style.top = (r.bottom + 8) + 'px';
+    $$('[data-a]', p).forEach(b => b.onclick = () => { p.hidden = true; act(b.dataset.a); });
+    return;
+  }
+  const m = modal(`<div class="act-sheet">${list}</div><div class="modal-actions stack"><button class="btn ghost" data-close>取消</button></div>`);
   $$('[data-a]', m.c).forEach(b => b.onclick = () => { m.close(); act(b.dataset.a); });
 };
 async function act(a) {
@@ -116,6 +125,7 @@ async function act(a) {
   if (a === 'save') $('#saveBtn').click();
   if (a === 'hist') { const { modal } = await import('./batch.js'); const m = modal(`<h3>版本历史</h3><div class="hist-list">${S.hist.map((h, i) => `<button class="hist-item ${i === S.hi ? 'cur' : ''}" data-i="${i}"><span>${String(i + 1).padStart(2, '0')} · ${esc(h.label)}</span><small>${fmtTime(h.t)}</small></button>`).reverse().join('')}</div><div class="modal-actions stack"><button class="btn ghost" data-close>关闭</button></div>`); $$('.hist-item', m.c).forEach(b => b.onclick = () => { bus.restore(+b.dataset.i); m.close(); }); }
   if (a === 'live') S.project?.live?.blob ? exportLive() : openLiveImport();
+  if (a === 'info' && !isMobileUI()) return $('#inspBtn').click();
   if (a === 'info') { $('#edMain').classList.add('show-insp'); scrim.hidden = false; bus.renderInsights?.(); }
   if (a === 'strip') { editor.classList.toggle('show-strip'); }
   if (a === 'lights') $('#darkenBtn').click();

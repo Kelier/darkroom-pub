@@ -39,7 +39,9 @@ export async function renderStrip() {
   for (const id of [...S.traySel]) if (!S.tray.includes(id)) S.traySel.delete(id);
   const n = S.tray.length, k = S.traySel.size;
   box.classList.toggle('selecting', k > 0);
-  box.innerHTML = `<div class="strip-l"><b>片夹</b><small>${n} 张${k ? ` · 已选 ${k}` : ''}</small></div>
+  const open = localStorage.getItem('darkroom-strip') === 'open';
+  box.classList.toggle('collapsed', !open);
+  box.innerHTML = `<button class="strip-l" id="stripTog" aria-expanded="${open}" title="${open ? '收起胶片条' : '展开胶片条：同步设置、拼贴、批量导出'}"><b>片夹 <i class="chev"></i></b><small>${n} 张${k ? ` · 已选 ${k}` : ''}</small></button>
     <div class="tray" id="tray">${S.tray.map((id, i) => { const r = recCache.get(id); return `<div class="frame ${S.project?.id === id ? 'cur' : ''} ${S.traySel.has(id) ? 'sel' : ''}" data-id="${id}" title="${esc(r.name)}"><img src="${r.thumb || ''}" alt=""><span class="no">${String(i + 1).padStart(2, '0')}A</span><span class="ck" data-ck></span></div>`; }).join('')}
       <button class="frame add" data-action="upload" title="导入更多照片"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>
     <div class="strip-actions">
@@ -51,6 +53,7 @@ export async function renderStrip() {
     if (e.target.closest('[data-ck]') || e.shiftKey || e.metaKey || e.ctrlKey) { S.traySel.has(id) ? S.traySel.delete(id) : S.traySel.add(id); renderStrip(); return; }
     if (S.project?.id !== id) bus.openById(id);
   });
+  $('#stripTog', box).onclick = () => { localStorage.setItem('darkroom-strip', open ? 'closed' : 'open'); renderStrip(); setTimeout(() => bus.scheduleRender(), 320); };
   $('#selAll', box).onclick = () => { if (S.traySel.size === n) S.traySel.clear(); else S.tray.forEach(id => S.traySel.add(id)); renderStrip(); };
   $('#syncBtn', box).onclick = () => openSyncModal([...S.traySel].filter(id => id !== S.project?.id));
   $('#colBtn', box).onclick = () => createCollage();

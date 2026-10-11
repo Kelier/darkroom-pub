@@ -1,6 +1,6 @@
 import puppeteer from '../../red-room/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js';
 import assert from 'node:assert/strict';
-const b=await puppeteer.launch({executablePath:'/usr/local/bin/chromium',headless:true,args:['--no-sandbox']});
+const b=await puppeteer.launch({executablePath:'/usr/local/bin/chromium',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 try{const p=await b.newPage();await p.goto('http://localhost:5180');const result=await p.evaluate(async()=>{
  const {drawLayer}=await import('/js/layers.js'),{FLOW_MODES}=await import('/js/flow.js'),{STICKERS}=await import('/js/presets.js');
  const c=document.createElement('canvas');c.width=c.height=300;const x=c.getContext('2d');

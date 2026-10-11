@@ -3,7 +3,7 @@ import puppeteer from '../../red-room/node_modules/puppeteer-core/lib/esm/puppet
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const OUT=process.env.OUT||'/tmp/lvout';fs.mkdirSync(OUT,{recursive:true});
-const b=await puppeteer.launch({executablePath:'/usr/local/bin/chromium',headless:true,args:['--no-sandbox']});
+const b=await puppeteer.launch({executablePath:'/usr/local/bin/chromium',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const p=await b.newPage();const errors=[];p.on('pageerror',e=>errors.push(e.message));p.on('console',m=>{if(m.type()==='error')console.log('console',m.text().slice(0,250));});
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const waitFile=async(re,ms=90000)=>{const t=Date.now();while(Date.now()-t<ms){const f=fs.readdirSync(OUT).find(n=>re.test(n)&&!n.endsWith('.crdownload'));if(f)return OUT+'/'+f;await wait(300);}throw new Error('no file '+re);};

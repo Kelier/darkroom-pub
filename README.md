@@ -60,6 +60,7 @@ python3 serve.py 5180
 | **Make it yours** | 28 种内置贴纸；自定义 PNG / JPG / WebP / SVG 导入、透明度、缩放、旋转与图层排序 |
 | **Develop locally** | 主体检测与分割、深度估计、补全 / 消除；透视、景深和 2.5D 空间效果 |
 | **Keep the moment moving** | 自动识别安卓动态照片、iPhone HEIC/JPG + MOV、.livp / ZIP 实况包；时间轴、片段裁剪、封面；导出 iPhone 实况（JPG + MOV，Apple Content ID）、安卓 Motion Photo 单文件 JPG、H.264 MP4 |
+| **Into the darkroom** | 沉浸式灵感页：首屏显影、六章滚动叙事，每章一枚暗房贴纸（胶卷、放大镜、朱印、拍立得、实况、计时器）逐一贴上作品；放大机台式冲洗入口与显影过渡；片夹为一卷可向下拉出的 35 mm 胶片 |
 | **Pocket darkroom** | 手机端全屏编辑：底部工具栏 + 可拖动参数抽屉、双指缩放构图、长按对比原片、底部弹层菜单，导出后可直接「存储到相册 / 分享」 |
 | **Work in batches** | 片夹、同步设置、批量风格、拼贴、批量 ZIP 导出 |
 | **Lights out** | 隐去工具面板，保留作品与胶卷架；一键还原，撤销找回 |
@@ -96,6 +97,7 @@ source blob ──────────────────────�
 │   ├── templates.js    # editable layout recipes
 │   ├── live.js         # live import, timeline, export flow
 │   ├── livefmt.js      # motion-photo / Live Photo containers, WebCodecs + MP4/MOV muxer
+│   ├── stickers.js     # die-cut darkroom stickers (SVG)
 │   ├── mobile.js       # phone editor: tool sheet, pinch, hold-to-compare
 │   ├── media.js        # source assets & inference results
 │   ├── store.js        # IndexedDB persistence
